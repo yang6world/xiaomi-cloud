@@ -120,7 +120,7 @@ class XiaomiCloudlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         pattern = re.compile(r'_sign=(.*?)&')
         
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=self._headers)
             self._cookies['pass_trace'] = r.history[0].headers.getall('Set-Cookie')[2].split(";")[0].split("=")[1]
             _LOGGER.debug("--2---%s",parse.unquote(pattern.findall(r.history[0].headers.getall('Location')[0])[0]))
@@ -153,7 +153,7 @@ class XiaomiCloudlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 auth_post_data['captCode'] = captCode
                 self._headers['Cookie'] = self._headers['Cookie'] + \
                                           '; ick={}'.format(self._cookies['ick'])
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.post(url, headers=self._headers, data=auth_post_data, cookies=self._cookies)
             self._cookies['pwdToken'] = r.cookies.get('passToken').value
             self._serviceLoginAuth2_json = json.loads((await r.text())[11:])
@@ -173,7 +173,7 @@ class XiaomiCloudlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         url = self._serviceLoginAuth2_json['location'] + \
               "&clientSign=" + parse.quote(base64_serviceToken.decode())
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=loginmiai_header)
             if r.status == 200:
                 self._Service_Token = r.cookies.get('serviceToken').value
@@ -191,7 +191,7 @@ class XiaomiCloudlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         get_device_list_header = {'Cookie': 'userId={};serviceToken={}'.format(
             self.userId, self._Service_Token)}
         try:
-            with async_timeout.timeout(15, loop=self.hass.loop):
+            with async_timeout.timeout(15):
                 r = await session.get(url, headers=get_device_list_header)
             if r.status == 200:
                 data = json.loads(await
